@@ -1,0 +1,25 @@
+name: Update Helm Chart Version
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Update image tag in values.yaml
+        run: |
+          sed -i "s/^  tag: .*/  tag: ${VERSION}/" flask-app/values.yaml
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git commit -am "Update image tag to ${VERSION}"
+          git push
+
